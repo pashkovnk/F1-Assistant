@@ -156,28 +156,3 @@ class BotDB:
 
 
 bot = BotDB('F1Assistant.db')
-# bot.ticketIsBought("MainStandWkd.1")
-# bot.add_ticket_info([['Main', 'Stand', 'Wkd.'], ['Batelco', 'Stand', 'Wkd.'], ['Batelco', 'Stand', 'Sat./Sun.'],
-#                      ['Batelco', 'Stand', 'Fri.'], ['Turn 1', 'Stand', 'Wkd.'], ['University', 'Stand', 'Wkd.'],
-#                      ['Victory', 'Stand', 'Wkd.']],
-#                     ['$ 453,00', '$ 346,00', '$ 306,00', '$ 187,00', '$ 320,00', '$ 186,00', '$ 173,00'])
-# try:
-#     connect = sqlite3.connect("F1Assistant.db")
-#     cursor = connect.cursor()
-#
-#     # Создал год с year = 2022
-#     cursor.execute("INSERT OR IGNORE INTO 'calendars_years' ('year') VALUES (?)", (2022,))
-#
-#     # Считываю все годы
-#     years = cursor.execute("SELECT * FROM 'calendars_years'")
-#     print(years.fetchall())
-#
-#     # Подтверждаем изменения
-#     connect.commit()
-#
-# except sqlite3.Error as error:
-#     print("Ошибка", error)
-#
-# finally:
-#     if connect:
-#         connect.close()
