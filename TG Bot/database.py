@@ -100,10 +100,67 @@ class BotDB:
         self.connect.commit()
         return last_update.fetchall()[0][0]
 
+    def get_ticketType_info(self, ticket):
+        """Получаем информацию о билете"""
+        ticketInfo = self.cursor.execute(
+            """SELECT tribune, type, days, price, seatNumber FROM 'tickets' WHERE ticketKey = ? AND isAvailable = ?""",
+            (ticket, "Yes",))
+        return ticketInfo.fetchall()
+
+    def get_tickets(self):
+        """Получаем все типы билетов"""
+        return self.cursor.execute("""SELECT tribune, type, days, price FROM 'tickets'""").fetchall()
+
+    def add_ticket_info(self, ticketTypes, ticketPrices):
+        """Добавляем инфу о билетах"""
+        for i in range(len(ticketTypes)):
+            # Если билеты такого типа существуют, то последующий цикл не сработает и билеты не добавятся повторно
+            checking = (self.cursor.execute(
+                """SELECT ticketKey FROM 'tickets' WHERE tribune = ? AND type = ? AND days = ? AND price = ?""",
+                (ticketTypes[i][0], ticketTypes[i][1], ticketTypes[i][2], ticketPrices[i],)))
+            if not bool(len(checking.fetchall())):
+                for seat in range(1, 100 + 1):  # выделил на каждый тип билета по 100 мест
+                    self.cursor.execute(
+                        "INSERT INTO 'tickets' ('tribune', 'price', 'type', 'days', 'ticketKey', 'isAvailable', 'seatNumber') VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (ticketTypes[i][0],
+                         ticketPrices[i],
+                         ticketTypes[i][1],
+                         ticketTypes[i][2],
+                         (ticketTypes[i][0] + ticketTypes[i][1] + ticketTypes[i][2]),
+                         "Yes",
+                         str(seat)
+                         ))
+        return self.connect.commit()
+
+    def ticketIsBought(self, ticketKey):
+        last_bought = self.cursor.execute("""SELECT rowid FROM tickets WHERE ticketKey = ? AND isAvailable = ?""",
+                                          (ticketKey, "No",))
+        if last_bought.fetchall() == []:
+            last_bought = (self.cursor.execute("""SELECT rowid FROM tickets WHERE ticketKey = ? AND isAvailable = ?""",
+                                               (ticketKey, "Yes",))).fetchall()[0][0]
+        else:
+            last_bought = last_bought.fetchall()[0]
+        # print(last_bought.fetchall())
+        self.cursor.execute(
+            """UPDATE tickets SET isAvailable = 'No' WHERE ticketKey = ? AND isAvailable = ? AND rowid = ?""",
+            (ticketKey, "Yes", last_bought,))
+        return self.connect.commit()
+
+    def add_boughtTicket_toLogs(self, ticketKey, id_owner):
+        self.cursor.execute("""INSERT INTO orders_info ('order', 'owner') VALUES (?,?)""", (ticketKey, id_owner))
+        return self.connect.commit()
+
     def close(self):
         """Закрытие соединений с БД"""
         self.connect.close()
 
+
+bot = BotDB('F1Assistant.db')
+# bot.ticketIsBought("MainStandWkd.1")
+# bot.add_ticket_info([['Main', 'Stand', 'Wkd.'], ['Batelco', 'Stand', 'Wkd.'], ['Batelco', 'Stand', 'Sat./Sun.'],
+#                      ['Batelco', 'Stand', 'Fri.'], ['Turn 1', 'Stand', 'Wkd.'], ['University', 'Stand', 'Wkd.'],
+#                      ['Victory', 'Stand', 'Wkd.']],
+#                     ['$ 453,00', '$ 346,00', '$ 306,00', '$ 187,00', '$ 320,00', '$ 186,00', '$ 173,00'])
 # try:
 #     connect = sqlite3.connect("F1Assistant.db")
 #     cursor = connect.cursor()

@@ -5,8 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 from googletrans import Translator
 
-from config import flagsEmoji, current_year, teamURLs, teamPhotoURLs, driverURLs, driverPhotoURLs
-
+from config import flagsEmoji, ticketsToBahrain, current_year, teamURLs, teamPhotoURLs, driverURLs, driverPhotoURLs
+import random
 
 def openDB():
     from database import BotDB
@@ -232,6 +232,7 @@ def getTeamInfo(url, urlPhoto, *toUpdate):
             with open('teamPics/' + teamName + '.jpg', 'wb') as handler:
                 handler.write(imageData)
         team_return = database.get_info_team(teamName)
+        database.close()
         return team_return[0], team_return[1], team_return[2], team_return[3], team_return[4]
 
 
@@ -355,8 +356,31 @@ def getDriverInfo(url, urlPhoto, *toUpdate):
                 handler.write(imageData)
         driver_info = database.get_info_driver(driverName)
         return driver_info
+    database.close()
     return driverStatistics, driverName, driverInfo
 
+def tickets_to_BahrainGP(*toUpdate):
+    database = openDB()
+    GPPhotoName = "BahrainGP.jpg"
+    BahrainGPTicketTypes = []
+    BahrainGPTicketPrices = []
+    if toUpdate:
+        response = requests.get(ticketsToBahrain)
+        bs = BeautifulSoup(response.text, 'lxml')
+        BahrainGPTicketTypes = bs.find('div', class_='table table_grandstandtickets').find_next('div', class_='tablebody').find_all('div', class_='product cell')
+        BahrainGPTicketTypes = [[" ".join(ticketType.find_next('strong').text.split()[:-1]), "".join(ticketType.find_next('strong').text.split()[-1].split(ticketType.find_next('span', class_='producttime').text)), ticketType.find_next('span', class_='producttime').text] for ticketType in BahrainGPTicketTypes]
+        BahrainGPTicketPrices = bs.find('div', class_='table table_grandstandtickets').find_next('div', class_='tablebody').find_all('div', class_='price cell')
+        BahrainGPTicketPrices = [" ".join(ticketPrice.text.split()) for ticketPrice in BahrainGPTicketPrices]
+        database.add_ticket_info(BahrainGPTicketTypes, BahrainGPTicketPrices)
+    else:
+        tickets = database.get_tickets()
+        for i in range(len(tickets)):
+            if BahrainGPTicketTypes.count(list(tickets[i][:-1])) == 0:
+                BahrainGPTicketTypes.append(list(tickets[i][:-1]))
+                BahrainGPTicketPrices.append(tickets[i][-1])
+    database.close()
+    return BahrainGPTicketTypes, BahrainGPTicketPrices, GPPhotoName
+tickets_to_BahrainGP(True)
 
 def update_info():
     database = openDB()
@@ -368,6 +392,8 @@ def update_info():
         for driver in driverURLs.keys():
             getDriverInfo(driverURLs.get(driver), driverPhotoURLs.get(driver), True)
         database.log_update_time(time.time())
-
+    elif (time.time() - last_update > 3600):
+        tickets_to_BahrainGP(True)
+    database.close()
 
 update_info()

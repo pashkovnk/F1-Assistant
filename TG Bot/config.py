@@ -1,10 +1,9 @@
 token = "5899204719:AAEqnkTQSdt6o7H-NUqPIrm-qBI2eNgRfeI"
-
+payments_token = "401643678:TEST:85080fc1-f19e-481a-91e1-9736d0b3d925"
 import time
 
 import requests
 from bs4 import BeautifulSoup
-
 current_year = time.asctime().split()[-1]
 
 # Получение актуального списка команд
@@ -49,6 +48,10 @@ driverPhotoURLs.pop('Нико Хюлькенберг')
 driverPhotoURLs['Николас Латифи'] = driverPhotoURLs.get('Николя Латифи')
 driverPhotoURLs.pop('Николя Латифи')
 
+# Ссылка на сайт с билетами на F1
+ticketsToBahrain = "https://www.gpticketshop.com/en/f1/bahrain-f1-grand-prix/tickets.html"
+# tickets = {f"{bahrainInfo[0][ticket][0]} | {bahrainInfo[0][ticket][1]} | {bahrainInfo[0][ticket][2]}  {bahrainInfo[1][ticket]}" : f"{bahrainInfo[0][ticket][0]}{bahrainInfo[0][ticket][1]}{bahrainInfo[0][ticket][2]}" for ticket in range(len(bahrainInfo[0]))}
+# print(tickets)
 # Ссылки на фильмы/сериалы
 contentURLs = {"\"Сенна\" 2010 IMDb: 8.50": "https://www.kinopoisk.ru/film/573209/",
                "\"Шумахер\" 2021 IMDb: 7.40": "https://www.kinopoisk.ru/film/4536604/",

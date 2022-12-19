@@ -1,0 +1,34 @@
+# def getDriverInfo(url):
+#     # TODO пропиши количество побед/подиумов/титулов/очков за карьеру
+#     # /позицию в крайнем сезоне и количество очков в нем
+#     response = requests.get(url)
+#     bs = BeautifulSoup(response.text, "lxml")
+#     try:
+#         teamName = bs.find('div', class_='ms-entity-header_start').find('a',
+#                                                                         class_='ms-driver-header_team-title ms-link').text
+#         driverNumber = bs.find('div', class_='ms-driver_number ms-mr').text
+#     except AttributeError:
+#         # TODO пропиши поиск команды и номера по другим ресурсам (напр., википедия),
+#         # а если сейчас он нигде не числится,
+#         # то впиши бывший номер и команду с соответствующей припиской, а то не красиво как-то(
+#         teamName = "Нет команды"
+#         driverNumber = "(Нет номера)"
+#     driverName = bs.find('div', class_='ms-entity-header_start').find('h1', class_='ms-entity-header_title').text
+#     driverAgeData = bs.find('div', class_='ms-entity-header_start').find('span',
+#                                                                          class_='ms-entity-header_age').text.split()
+#     driverAgeData = [int("".join(driverAgeData[-1].split(')'))), list(map(int, driverAgeData[0].split('-')))]
+#     driverNationality = bs.find('img', class_='ms-entity-header_flag').get('title').lower()
+#     # TODO фотки бери из https://www.skysports.com/f1/drivers-teams,
+#     # тут они более стандартизированные
+#     driverPhoto = bs.find('img', class_="ms-item_img ms-item_img--3_2").get('src')
+#     if not os.path.exists('driverPics/'):
+#         os.mkdir('driverPics/')
+#     imageData = requests.get(driverPhoto, verify=False).content
+#     with open('driverPics/' + driverName + '.jpg', 'wb') as handler:
+#         handler.write(imageData)
+#     info = (f"<b>{driverName} №{driverNumber}\n\n</b>"
+#             f"<b>Команда:</b> {teamName}\n"
+#             f"<b>Возраст:</b> {driverAgeData[0]}\n"
+#             f"<b>Дата рождения:</b> {driverAgeData[1][2]}.{driverAgeData[1][1]}.{driverAgeData[1][0]}\n"
+#             f"<b>Национальность:</b> {translator.translate(driverNationality, dest='ru').text.capitalize()} {flagsEmoji.get(driverNationality)}\n")
+#     return [info, driverName]
